@@ -29,22 +29,22 @@ void move(float speed, int direction)
       motorBR.run(BACKWARD);
       break;
     case GO:
-      motorFL.run(BACKWARD));
+      motorFL.run(BACKWARD);
       motorFR.run(BACKWARD);
       motorBL.run(FORWARD);
       motorBR.run(FORWARD);
       break;
     case CW:
-      motorFL.run(BACKWARD);
-      motorFR.run(FORWARD);
-      motorBL.run(FORWARD);
-      motorBR.run(BACKWARD);
-      break;
-    case CCW:
       motorFL.run(FORWARD);
       motorFR.run(BACKWARD);
       motorBL.run(BACKWARD);
       motorBR.run(FORWARD);
+      break;
+    case CCW:
+      motorFL.run(BACKWARD);
+      motorFR.run(FORWARD);
+      motorBL.run(FORWARD);
+      motorBR.run(BACKWARD);
       break;
     case STOP:
     default:
@@ -60,7 +60,7 @@ void forward(float dist, float speed)
   if (dist > 0)
     deltaDist = dist;
   else
-    deltaDist = 9999999;
+    deltaDist = 0;//9999999;
 
   newDist = forwardDist + deltaDist;
   dir = (TDirection) FORWARD;
