@@ -1,31 +1,27 @@
-/**
- * robotlib.ino
- * 
- * contains the functions to move the robot
- */
-
 #include <AFMotor.h>
 
 
 // Motor control
-#define FRONT_LEFT 4   // M4 on the driver shield
-#define FRONT_RIGHT 1  // M1 on the driver shield
-#define BACK_LEFT 3    // M3 on the driver shield
-#define BACK_RIGHT 2   // M2 on the driver shield
+#define FRONT_LEFT   4 // M4 on the driver shield
+#define FRONT_RIGHT  1 // M1 on the driver shield
+#define BACK_LEFT    3 // M3 on the driver shield
+#define BACK_RIGHT   2 // M2 on the driver shield
 
 AF_DCMotor motorFL(FRONT_LEFT);
 AF_DCMotor motorFR(FRONT_RIGHT);
 AF_DCMotor motorBL(BACK_LEFT);
 AF_DCMotor motorBR(BACK_RIGHT);
 
-void move(float speed, int direction) {
+void move(float speed, int direction)
+{
   int speed_scaled = (speed / 100.0) * 255;
   motorFL.setSpeed(speed_scaled);
   motorFR.setSpeed(speed_scaled);
   motorBL.setSpeed(speed_scaled);
   motorBR.setSpeed(speed_scaled);
 
-  switch (direction) {
+  switch (direction)
+  {
     case BACK:
       motorFL.run(BACKWARD);
       motorFR.run(BACKWARD);
@@ -59,106 +55,45 @@ void move(float speed, int direction) {
   }
 }
 
-void forward(float dist, float speed) {
-  if (!mode) {
-    if (dist > 0)
-      deltaDist = dist;
-    else
-      deltaDist = 9999999;
+void forward(float dist, float speed)
+{
+  if (dist > 0)
+    deltaDist = dist;
+  else
+    deltaDist = 9999999;
 
-    newDist = forwardDist + deltaDist;
-    dir = (TDirection)FORWARD;
-  }
+  newDist = forwardDist + deltaDist;
+  dir = (TDirection) FORWARD;
   move(speed, FORWARD);
 }
 
-void backward(float dist, float speed) {
-  if (!mode) {
-    if (dist > 0)
-      deltaDist = dist;
-    else
-      deltaDist = 9999999;
+void backward(float dist, float speed)
+{
+  if (dist > 0)
+    deltaDist = dist;
+  else
+    deltaDist = 9999999;
 
-    newDist = reverseDist + deltaDist;
-    dir = (TDirection)BACKWARD;
-  }
+  newDist = reverseDist + deltaDist;
+
+  dir = (TDirection) BACKWARD;
   move(speed, BACKWARD);
 }
 
-void left(float ang, float speed) {
-  if (!mode) {
-    if (ang == 0)
-      deltaTicks = 99999999;
-    else
-      deltaTicks = computeDeltaTicks(ang);
-
-    targetTicks = leftReverseTicksTurns + deltaTicks;
-    dir = (TDirection)LEFT;
-  }
+void ccw(float dist, float speed)
+{
+  dir = (TDirection) LEFT;
   move(speed, LEFT);
 }
 
-void right(float ang, float speed) {
-  if (!mode) {
-    if (ang == 0)
-      deltaTicks = 99999999;
-    else
-      deltaTicks = computeDeltaTicks(ang);
-
-    targetTicks = rightReverseTicksTurns + deltaTicks;
-    dir = (TDirection)RIGHT;
-  }
+void cw(float dist, float speed)
+{
+  dir = (TDirection) RIGHT;
   move(speed, RIGHT);
 }
 
-void stop() {
-  if (!mode) {
-    dir = (TDirection)STOP;
-  }
+void stop()
+{
+  dir = (TDirection) STOP;
   move(0, STOP);
-}
-
-//This stops the robot based on the original controls, i.e. the robot
-//will move the commanded distance as per what the operator sent over
-//then stop upon reaching.
-void original_movement() {
-  if (deltaDist > 0) {
-    if (dir == FORWARD) {
-      if (forwardDist > newDist) {
-        deltaDist = 0;
-        newDist = 0;
-        stop();
-      }
-    } else if (dir == BACKWARD) {
-      if (reverseDist > newDist) {
-        deltaDist = 0;
-        newDist = 0;
-        stop();
-      }
-    } else if (dir == (TDirection)STOP) {
-      deltaDist = 0;
-      newDist = 0;
-      stop();
-    }
-  }
-
-  if (deltaTicks > 0) {
-    if (dir == LEFT) {
-      if (leftReverseTicksTurns >= targetTicks) {
-        deltaTicks = 0;
-        targetTicks = 0;
-        stop();
-      }
-    } else if (dir == RIGHT) {
-      if (rightReverseTicksTurns >= targetTicks) {
-        deltaTicks = 0;
-        targetTicks = 0;
-        stop();
-      }
-    } else if (dir == (TDirection)STOP) {
-      deltaTicks = 0;
-      targetTicks = 0;
-      stop();
-    }
-  }
 }
