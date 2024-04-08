@@ -5,9 +5,7 @@
 #include "packet.h"
 #include "constants.h"
 
-//PI for calculating circumference,
 //Alex's length and breadth in cm
-#define PIE 3.141592654
 #define ALEX_LENGTH 25.7
 #define ALEX_BREADTH 15.5
 #define fosc 16000000
@@ -75,30 +73,6 @@ unsigned long computeDeltaTicks(float ang)
   return ticks;
 }
 
-void left(float ang, float speed)
-{
-  if (ang == 0)
-    deltaTicks = 99999999;
-  else
-    deltaTicks = computeDeltaTicks(ang);
-
-  targetTicks = leftReverseTicksTurns + deltaTicks;
-
-  ccw(ang, speed);
-}
-
-void right(float ang, float speed)
-{
-
-  if (ang == 0)
-    deltaTicks = 99999999;
-  else
-    deltaTicks = computeDeltaTicks(ang);
-
-  targetTicks = rightReverseTicksTurns + deltaTicks;
-
-  cw(ang, speed);
-}
 
 /*
 
@@ -507,7 +481,7 @@ void waitForHello()
 void setup() {
   // put your setup code here, to run once:
   alexDiagonal = sqrt((ALEX_LENGTH * ALEX_LENGTH) + (ALEX_BREADTH * ALEX_BREADTH));
-  alexCirc = PIE * alexDiagonal;
+  alexCirc = PI * alexDiagonal;
 
   cli();
   setupEINT();

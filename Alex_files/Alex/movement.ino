@@ -23,28 +23,28 @@ void move(float speed, int direction)
   switch (direction)
   {
     case BACK:
-      motorFL.run(BACKWARD);
-      motorFR.run(BACKWARD);
-      motorBL.run(FORWARD);
-      motorBR.run(FORWARD);
+      motorFL.run(FORWARD);
+      motorFR.run(FORWARD);
+      motorBL.run(BACKWARD);
+      motorBR.run(BACKWARD);
       break;
     case GO:
-      motorFL.run(FORWARD);
-      motorFR.run(FORWARD);
-      motorBL.run(BACKWARD);
-      motorBR.run(BACKWARD);
-      break;
-    case CW:
-      motorFL.run(FORWARD);
+      motorFL.run(BACKWARD));
       motorFR.run(BACKWARD);
-      motorBL.run(BACKWARD);
+      motorBL.run(FORWARD);
       motorBR.run(FORWARD);
       break;
-    case CCW:
+    case CW:
       motorFL.run(BACKWARD);
       motorFR.run(FORWARD);
       motorBL.run(FORWARD);
       motorBR.run(BACKWARD);
+      break;
+    case CCW:
+      motorFL.run(FORWARD);
+      motorFR.run(BACKWARD);
+      motorBL.run(BACKWARD);
+      motorBR.run(FORWARD);
       break;
     case STOP:
     default:
@@ -80,14 +80,29 @@ void backward(float dist, float speed)
   move(speed, BACKWARD);
 }
 
-void ccw(float dist, float speed)
+void left(float ang, float speed)
 {
+  if (ang == 0)
+    deltaTicks = 99999999;
+  else
+    deltaTicks = computeDeltaTicks(ang);
+
+  targetTicks = leftReverseTicksTurns + deltaTicks;
+
   dir = (TDirection) LEFT;
   move(speed, LEFT);
 }
 
-void cw(float dist, float speed)
+void right(float ang, float speed)
 {
+
+  if (ang == 0)
+    deltaTicks = 99999999;
+  else
+    deltaTicks = computeDeltaTicks(ang);
+
+  targetTicks = rightReverseTicksTurns + deltaTicks;
+
   dir = (TDirection) RIGHT;
   move(speed, RIGHT);
 }
