@@ -106,7 +106,6 @@ void sendStatus()
   // Use the params array to store this information, and set the
   // packetType and command files accordingly, then use sendResponse
   // to send out the packet. See sendMessage on how to use sendResponse.
-  //
 
   TPacket statusPacket;
   statusPacket.packetType = PACKET_TYPE_RESPONSE;
@@ -302,12 +301,12 @@ ISR(INT3_vect) {
 // with bare-metal code.
 void setupSerial()
 {
-  /* To replace later with bare-metal.
+  // To replace later with bare-metal.
   UCSR0C = 0b00000110; // Asynchronous USART Mode
   unsigned int B = round(fosc / (16*9600)) - 1; // Calculate the B value for 9600 baud
   UBBR0L = B; // B value of 103
   UBBR0H = 0; // 0 because B <= 255
-  UCSR0A = 0; // Clear the bits of UCSR0A while setting up */
+  UCSR0A = 0; // Clear the bits of UCSR0A while setting up
 
   Serial.begin(9600);
   // Change Serial to Serial2/Serial3/Serial4 in later labs when using the other UARTs
@@ -324,7 +323,7 @@ void startSerial()
    
   // Start the transmitter and receiver, but disable
   // all interrupts.
-  // UCSR0B = 0b00011000;
+  UCSR0B = 0b00011000;
 }
 
 // Read the serial port. Returns the read character in
@@ -333,20 +332,20 @@ void startSerial()
 
 int readSerial(char *buffer)
 {
-   /* int count = 0;
+ int count = 0;
  while(UCSR0A & (1 << RXC0)) {
    count++; // read the data and increment the count
  }
- return count; */
+ return count;
    
-  int count = 0;
+  //int count = 0;
 
   // Change Serial to Serial2/Serial3/Serial4 in later labs when using other UARTs
 
-  while (Serial.available())
+  /*while (Serial.available())
     buffer[count++] = Serial.read();
 
-  return count; // returns the number of bytes read?
+  return count; // returns the number of bytes read*/
 }
 
 // Write to the serial port. Replaced later with
@@ -354,11 +353,11 @@ int readSerial(char *buffer)
 
 void writeSerial(const char *buffer, int len)
 {
-   /* for(int i = 0; i < len; i++) {
+  for(int i = 0; i < len; i++) {
     while(UCSR0A & (1 << UDRE0) == 0);
     UDR0 = buffer[i]; // write each byte of the buffer
-  } */
-  Serial.write(buffer, len);
+  }
+  //Serial.write(buffer, len);
   // Change Serial to Serial2/Serial3/Serial4 in later labs when using other UARTs
 }
 
