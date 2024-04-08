@@ -517,11 +517,6 @@ void handlePacket(TPacket *packet)
 void loop() {
   // Uncomment the code below for Step 2 of Activity 3 in Week 8 Studio 2
 
-  //forward(0, 100);
-
-  // Uncomment the code below for Week 9 Studio 2
-
-
   // put your main code here, to run repeatedly:
   TPacket recvPacket; // This holds commands from the Pi
 
