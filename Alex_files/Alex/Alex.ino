@@ -443,11 +443,11 @@ void evaluateColour(int r, int g, int b) {
   float weightedWhite = ((r * whiteR) + (g * whiteG) + (b * whiteB))/(whiteR + whiteG + whiteB);
 
   if (weightedRed > weightedGreen && weightedRed > weightedWhite) {
-    colour.params[3] = 0; //RED
+    colour->params[3] = 0; //RED
   } else if (weightedGreen > weightedWhite) {
-    colour.params[3] = 1; //GREEN
+    colour->params[3] = 1; //GREEN
   } else {
-    colour.params[3] = 2; //WHITE
+    colour->params[3] = 2; //WHITE
   }
   return;
 }
@@ -461,7 +461,7 @@ void readColour() {
   digitalWrite(S2,LOW);
   digitalWrite(S3,LOW);
   // Reading the output frequency
-  frequency = pulseIn(sensorOut, LOW);
+  int frequency = pulseIn(sensorOut, LOW);
   colour.params[0] = frequency;
 
   delay(100);
@@ -560,6 +560,14 @@ void handleCommand(TPacket *command)
       sendOK();
       clearOneCounter(command->params[0]);
       break;
+     
+    case COMMAND_COLOUR:
+     readColour();
+     sendOK();
+
+    case COMMAND_ULTRASONIC:
+     readUltrasonic();
+     sendOK();
 
     default:
       sendBadCommand();
@@ -611,6 +619,7 @@ void setup() {
   setupSerial();
   startSerial();
   setupUltrasonic();
+  setupColour();
   enablePullups();
   initializeState();
   sei();
