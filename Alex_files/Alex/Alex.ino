@@ -16,6 +16,7 @@
 #define TRIG 26
 #define ECHO 27
 #define TIMEOUT 4000
+#define SPEED_OF_SOUND 340
 
 /*
    Alex's configuration constants
@@ -425,7 +426,7 @@ float triangularMembership(int x, int a, int b, int c) {
   }
 }
 
-void evaluateColour(int r, int g, int b) {
+void evaluateColour(int r, int g, int b, TPacket *colour) {
   float redR = triangularMembership(r, 199, 369, 463);
   float greenR = triangularMembership(r, 400, 534, 584);
   float whiteR = triangularMembership(r, 160, 300, 412);    
@@ -443,11 +444,11 @@ void evaluateColour(int r, int g, int b) {
   float weightedWhite = ((r * whiteR) + (g * whiteG) + (b * whiteB))/(whiteR + whiteG + whiteB);
 
   if (weightedRed > weightedGreen && weightedRed > weightedWhite) {
-    colour.params[3] = 0; //RED
+    colour->params[3] = 0; //RED
   } else if (weightedGreen > weightedWhite) {
-    colour.params[3] = 1; //GREEN
+    colour->params[3] = 1; //GREEN
   } else {
-    colour.params[3] = 2; //WHITE
+    colour->params[3] = 2; //WHITE
   }
   return;
 }
@@ -461,7 +462,7 @@ void readColour() {
   digitalWrite(S2,LOW);
   digitalWrite(S3,LOW);
   // Reading the output frequency
-  frequency = pulseIn(sensorOut, LOW);
+  int frequency = pulseIn(sensorOut, LOW);
   colour.params[0] = frequency;
 
   delay(100);
@@ -484,10 +485,9 @@ void readColour() {
   
   delay(100);
 
-  evaluateColour(colour.params[0], colour.params[1], colour.params[2]);
+  evaluateColour(colour.params[0], colour.params[1], colour.params[2], &colour);
    
   sendResponse(&colour);
-  sendOk();
 }
 
 // Clears all our counters
@@ -561,6 +561,17 @@ void handleCommand(TPacket *command)
       clearOneCounter(command->params[0]);
       break;
 
+    case COMMAND_COLOUR:
+      sendOK();
+      readColour();
+      break;
+
+    case COMMAND_ULTRASONIC:
+      sendOK();
+      uint32_t distance = (uint32_t) readUltrasonic();
+      sendDist(distance);
+      break;
+
     default:
       sendBadCommand();
   }
@@ -611,6 +622,7 @@ void setup() {
   setupSerial();
   startSerial();
   setupUltrasonic();
+  setupColour();
   enablePullups();
   initializeState();
   sei();
