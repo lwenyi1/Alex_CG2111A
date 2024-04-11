@@ -576,7 +576,7 @@ void handleCommand(TPacket *command)
 
     case COMMAND_ULTRASONIC:
       sendOK();
-      uint32_t distance = (uint32_t) readUltrasonic();
+      uint32_t distance = round(readUltrasonic());
       sendDist(distance);
       break;
 
