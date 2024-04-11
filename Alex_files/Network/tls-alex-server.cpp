@@ -77,6 +77,24 @@ void handleStatus(TPacket *packet)
 	sendNetworkData(data, sizeof(data));
 }
 
+void handleColour(TPacket *packet)
+{
+  char data[65]; //EDIT BASED ON SIZE OF COLOUR PACKET
+  printf("COLOUR PACKET\n");
+  data[0] = NET_COLOUR_PACKET;
+	memcpy(&data[1], packet->params, sizeof(packet->params));
+	sendNetworkData(data, sizeof(data));
+}
+
+void handleUltrasonic(TPacket *packet)
+{
+  char data[65]; //EDIT BASED ON SIZE OF COLOUR PACKET
+  printf("ULTRASONIC PACKET\n");
+  data[0] = NET_ULTRASONIC_PACKET;
+	memcpy(&data[1], packet->params, sizeof(packet->params));
+	sendNetworkData(data, sizeof(data));
+}
+
 void handleResponse(TPacket *packet)
 {
 	// The response code is stored in command
@@ -93,6 +111,14 @@ void handleResponse(TPacket *packet)
 		case RESP_STATUS:
 			handleStatus(packet);
 		break;
+
+    case RESP_COLOUR:
+      handleColour(packet);
+    break;
+
+    case RESP_ULTRASONIC:
+      handleUltrasonic(packet);
+    break;
 
 		default:
 		printf("Boo\n");
@@ -277,6 +303,18 @@ void handleCommand(void *conn, const char *buffer)
 			commandPacket.command = COMMAND_GET_STATS;
 			uartSendPacket(&commandPacket);
 			break;
+
+    case 'u':
+    case 'U':
+      commandPacket.command = COMMAND_COLOUR;
+      uartSendPacket(&commandPacket);
+      break;
+    
+    case 'i':
+    case 'I':
+      commandPacket.command = COMMAND_ULTRASONIC;
+      uartSendPacket(&commandPacket);
+      break;
 
 		default:
 			printf("Bad command\n");
