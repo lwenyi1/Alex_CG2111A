@@ -1,5 +1,6 @@
 #define SPEED_OF_SOUND 340 // Speed of sound in ms-1 
 #define ULTRASONIC 12 // define ultrasonic sensor to be Pin 12
+#define TIMEOUT 4000
 
 
 double readUltrasonic(){ // detect distance of ultrasonic sensor from any objects in front of it
@@ -24,4 +25,7 @@ void setup() {
 void loop(){
   double distance = readUltrasonic();
   Serial.println(distance);
+ if(distance >= 2 && distance <= 10) {
+    Serial.println("Object detected, use colour sensor to scan...");
+  }
 }
