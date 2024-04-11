@@ -8,7 +8,14 @@
 //Alex's length and breadth in cm
 #define ALEX_LENGTH 25.7
 #define ALEX_BREADTH 15.5
-#define fosc 16000000
+#define S0 22
+#define S1 23
+#define S2 24
+#define S3 25
+#define sensorOut A8
+#define TRIG 26
+#define ECHO 27
+#define TIMEOUT 4000
 
 /*
    Alex's configuration constants
@@ -368,6 +375,121 @@ void writeSerial(const char *buffer, int len)
 
 */
 
+void setupUltrasonic() // Code for the ultrasonic sensor
+{
+  pinMode(TRIG, OUTPUT);
+  digitalWrite(TRIG, LOW);
+  pinMode(ECHO, INPUT);
+}
+
+double readUltrasonic() { // detect distance of ultrasonic sensor from any objects in front of it
+  digitalWrite(TRIG, HIGH); // emit pulse from ultasonic sensor
+  delayMicroseconds(10); // delay 10 microseconds
+  digitalWrite(TRIG, LOW); // stop emitting sound from ultrasonic sensor
+  pinMode(TRIG, INPUT); // set trigger pin to input mode
+  double duration = pulseIn(ECHO, HIGH, TIMEOUT); // measure time taken to detect echo from initial ultrasonic pulse
+  double dist = duration / 2 / 1000000 * SPEED_OF_SOUND * 100; // calculate distance of object from ultrasonic sensor in cm
+  return dist; // return distance of object from ultrasonic sensor in cm
+}
+
+void sendDist(uint32_t distance) {
+  TPacket distancePacket;
+  distancePacket.packetType = PACKET_TYPE_RESPONSE;
+  distancePacket.command = RESP_ULTRASONIC;
+  distancePacket.params[0] = distance;
+  sendResponse(&distancePacket);
+  sendOK();
+}
+
+void setupColour() {
+  PORTB |= 0b01111000; 
+  PORTC |= 0b00000001;
+  
+  // Setting frequency-scaling to 20%
+  digitalWrite(S0,HIGH);// to baremetal
+  digitalWrite(S1,LOW);
+}
+
+float triangularMembership(int x, int a, int b, int c) {
+  if (x < a) {
+    return 0;
+  }
+  else if (a <= x && x <= b) {
+    return (float)(x - a) / (b - a);
+  }
+  else if (b < x && x < c) {
+    return (float)(c - x) / (c - b);
+  }
+  else {
+    return 0;
+  }
+}
+
+void evaluateColour(int r, int g, int b) {
+  float redR = triangularMembership(r, 199, 369, 463);
+  float greenR = triangularMembership(r, 400, 534, 584);
+  float whiteR = triangularMembership(r, 160, 300, 412);    
+
+  float redG = triangularMembership(g, 393, 518, 561);
+  float greenG = triangularMembership(g, 337, 468, 528);
+  float whiteG = triangularMembership(g, 153, 290, 398);  
+
+  float redB = triangularMembership(b, 331, 369, 463);
+  float greenB = triangularMembership(b, 400, 534, 584);
+  float whiteB = triangularMembership(b, 134, 255, 346);   
+
+  float weightedRed = ((r * redR) + (g * redG) + (b * redB))/(redR + redG + redB);
+  float weightedGreen = ((r * greenR) + (g * greenG) + (b * greenB))/(greenR + greenG + greenB);
+  float weightedWhite = ((r * whiteR) + (g * whiteG) + (b * whiteB))/(whiteR + whiteG + whiteB);
+
+  if (weightedRed > weightedGreen && weightedRed > weightedWhite) {
+    colour.params[3] = 0; //RED
+  } else if (weightedGreen > weightedWhite) {
+    colour.params[3] = 1; //GREEN
+  } else {
+    colour.params[3] = 2; //WHITE
+  }
+  return;
+}
+
+void readColour() {
+  TPacket colour;
+  colour.packetType = PACKET_TYPE_RESPONSE;
+  colour.command = RESP_COLOUR;
+  
+  // Setting red filtered photodiodes to be read
+  digitalWrite(S2,LOW);
+  digitalWrite(S3,LOW);
+  // Reading the output frequency
+  frequency = pulseIn(sensorOut, LOW);
+  colour.params[0] = frequency;
+
+  delay(100);
+
+  // Setting Green filtered photodiodes to be read
+  digitalWrite(S2,HIGH);
+  digitalWrite(S3,HIGH);
+  // Reading the output frequency
+  frequency = pulseIn(sensorOut, LOW);
+  colour.params[1] = frequency;
+
+  delay(100);
+
+  // Setting Blue filtered photodiodes to be read
+  digitalWrite(S2,LOW);
+  digitalWrite(S3,HIGH);
+  // Reading the output frequency
+  frequency = pulseIn(sensorOut, LOW);
+  colour.params[2] = frequency;
+  
+  delay(100);
+
+  evaluateColour(colour.params[0], colour.params[1], colour.params[2]);
+   
+  sendResponse(&colour);
+  sendOk();
+}
+
 // Clears all our counters
 void clearCounters()
 {
@@ -488,6 +610,7 @@ void setup() {
   setupEINT();
   setupSerial();
   startSerial();
+  setupUltrasonic();
   enablePullups();
   initializeState();
   sei();
@@ -519,6 +642,7 @@ void loop() {
   // Uncomment the code below for Step 2 of Activity 3 in Week 8 Studio 2
 
   // put your main code here, to run repeatedly:
+   
   TPacket recvPacket; // This holds commands from the Pi
 
   TResult result = readPacket(&recvPacket);
