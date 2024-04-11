@@ -560,6 +560,14 @@ void handleCommand(TPacket *command)
       sendOK();
       clearOneCounter(command->params[0]);
       break;
+     
+    case COMMAND_COLOUR:
+     readColour();
+     sendOK();
+
+    case COMMAND_ULTRASONIC:
+     readUltrasonic();
+     sendOK();
 
     case COMMAND_COLOUR:
       sendOK();
