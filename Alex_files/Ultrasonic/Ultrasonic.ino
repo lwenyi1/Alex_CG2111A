@@ -11,8 +11,6 @@ double readUltrasonic(){ // detect distance of ultrasonic sensor from any object
   pinMode(ULTRASONIC, INPUT); // set ultrasonic pin to input mode
   double duration = pulseIn(ULTRASONIC, HIGH, TIMEOUT); // measure time taken to detect echo from initial ultrasonic pulse
   double dist = duration / 2 / 1000000 * SPEED_OF_SOUND * 100; // calculate distance of object from ultrasonic sensor in cm
-  Serial.print("Distance by ultrasonic: ");
-  Serial.println(dist); // print distance of object from ultrasonic sensor in cm to serial monitor
   return dist; // return distance of object from ultrasonic sensor in cm
 }
 
@@ -22,10 +20,19 @@ void setup() {
   Serial.begin(9600);
 }
 
+void sendDist(uint32_t distance) {
+  TPacket distancePacket;
+  distancePacket.packetType = PACKET_TYPE_RESPONSE;
+  distancePacket.command = RESP_DISTANCE;
+  distancePacket.params[0] = distance;
+  sendResponse(&distancePacket);
+  sendOK();
+}
+
 void loop(){
   double distance = readUltrasonic();
-  Serial.println(distance);
+  sendDist((uint32_t)distance);
  if(distance >= 2 && distance <= 10) {
-    Serial.println("Object detected, use colour sensor to scan...");
+    readColour();
   }
 }
