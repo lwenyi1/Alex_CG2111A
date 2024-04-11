@@ -8,7 +8,9 @@
 //Alex's length and breadth in cm
 #define ALEX_LENGTH 25.7
 #define ALEX_BREADTH 15.5
-#define fosc 16000000
+#define TRIG 26
+#define ECHO 27
+#define TIMEOUT 4000
 
 /*
    Alex's configuration constants
@@ -368,6 +370,32 @@ void writeSerial(const char *buffer, int len)
 
 */
 
+void setupUltrasonic() // Code for the ultrasonic sensor
+{
+  pinMode(TRIG, OUTPUT);
+  digitalWrite(TRIG, LOW);
+  pinMode(ECHO, INPUT);
+}
+
+double readUltrasonic() { // detect distance of ultrasonic sensor from any objects in front of it
+  digitalWrite(TRIG, HIGH); // emit pulse from ultasonic sensor
+  delayMicroseconds(10); // delay 10 microseconds
+  digitalWrite(TRIG, LOW); // stop emitting sound from ultrasonic sensor
+  pinMode(TRIG, INPUT); // set trigger pin to input mode
+  double duration = pulseIn(ECHO, HIGH, TIMEOUT); // measure time taken to detect echo from initial ultrasonic pulse
+  double dist = duration / 2 / 1000000 * SPEED_OF_SOUND * 100; // calculate distance of object from ultrasonic sensor in cm
+  return dist; // return distance of object from ultrasonic sensor in cm
+}
+
+void sendDist(uint32_t distance) {
+  TPacket distancePacket;
+  distancePacket.packetType = PACKET_TYPE_RESPONSE;
+  distancePacket.command = RESP_ULTRASONIC;
+  distancePacket.params[0] = distance;
+  sendResponse(&distancePacket);
+  sendOK();
+}
+
 // Clears all our counters
 void clearCounters()
 {
@@ -488,6 +516,7 @@ void setup() {
   setupEINT();
   setupSerial();
   startSerial();
+  setupUltrasonic();
   enablePullups();
   initializeState();
   sei();
@@ -519,6 +548,7 @@ void loop() {
   // Uncomment the code below for Step 2 of Activity 3 in Week 8 Studio 2
 
   // put your main code here, to run repeatedly:
+   
   TPacket recvPacket; // This holds commands from the Pi
 
   TResult result = readPacket(&recvPacket);
