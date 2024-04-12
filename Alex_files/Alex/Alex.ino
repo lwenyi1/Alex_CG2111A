@@ -378,16 +378,16 @@ void writeSerial(const char *buffer, int len)
 
 void setupUltrasonic() // Code for the ultrasonic sensor
 {
-  PORTB |= (1 << 7); // set trigger pin to output
-  PINB &= ~(1 << 7); // write LOW to trigger pin
-  PORTH &= ~(1 << 7); // set echo pin to input
+  DDRB |= (1 << 7); // set trigger pin to output
+  PORTB &= ~(1 << 7); // write LOW to trigger pin
+  DDRH &= ~(1 << 7); // set echo pin to input
 }
 
 double readUltrasonic() { // detect distance of ultrasonic sensor from any objects in front of it
-  PINB |= (1 << 7); // emit pulse from ultasonic sensor
+  PORTB |= (1 << 7); // emit pulse from ultasonic sensor
   delayMicroseconds(10); // delay 10 microseconds
-  PINB &= ~(1 << 7); // stop emitting sound from ultrasonic sensor
-  PORTB &= ~(1 << 7); // set trigger pin to input mode
+  PORTB &= ~(1 << 7); // stop emitting sound from ultrasonic sensor
+  DDRB &= ~(1 << 7); // set trigger pin to input mode
   double duration = pulseIn(ECHO, HIGH, TIMEOUT); // measure time taken to detect echo from initial ultrasonic pulse
   double dist = duration / 2 / 1000000 * SPEED_OF_SOUND * 100; // calculate distance of object from ultrasonic sensor in cm
   return dist; // return distance of object from ultrasonic sensor in cm
@@ -403,12 +403,14 @@ void sendDist(uint32_t distance) {
 }
 
 void setupColour() {
-  PORTB |= 0b01111000; 
-  PORTC |= 0b00000001;
+  DDRB |= 0b01111000; 
+  DDRC |= 0b00000001;
   
   // Setting frequency-scaling to 20%
-  digitalWrite(S0,HIGH);// to baremetal
-  digitalWrite(S1,LOW);
+   PORTB |= (1 << 3);
+   PORTB &= ~(1 << 4); // to be checked
+  /** digitalWrite(S0,HIGH);// to baremetal
+  digitalWrite(S1,LOW); */ 
 }
 
 float triangularMembership(int x, int a, int b, int c) {
@@ -459,8 +461,11 @@ void readColour() {
   colour.command = RESP_COLOUR;
   
   // Setting red filtered photodiodes to be read
-  digitalWrite(S2,LOW);
-  digitalWrite(S3,LOW);
+  PORTB &= ~((1 << 5)|(1 << 6)); // to be checked
+   
+  // digitalWrite(S2,LOW);
+  // digitalWrite(S3,LOW);
+   
   // Reading the output frequency
   int frequency = pulseIn(sensorOut, LOW);
   colour.params[0] = frequency;
@@ -468,8 +473,9 @@ void readColour() {
   delay(100);
 
   // Setting Green filtered photodiodes to be read
-  digitalWrite(S2,HIGH);
-  digitalWrite(S3,HIGH);
+  PORTB |= ((1 << 5)|(1 << 6)); // to be checked
+  // digitalWrite(S2,HIGH);
+  // digitalWrite(S3,HIGH);
   // Reading the output frequency
   frequency = pulseIn(sensorOut, LOW);
   colour.params[1] = frequency;
@@ -477,8 +483,10 @@ void readColour() {
   delay(100);
 
   // Setting Blue filtered photodiodes to be read
-  digitalWrite(S2,LOW);
-  digitalWrite(S3,HIGH);
+  PORTB &= ~(1 << 5);
+  PORTB |= (1 << 6); // to be checked
+  // digitalWrite(S2,LOW);
+  // digitalWrite(S3,HIGH);
   // Reading the output frequency
   frequency = pulseIn(sensorOut, LOW);
   colour.params[2] = frequency;
