@@ -378,16 +378,15 @@ void writeSerial(const char *buffer, int len)
 
 void setupUltrasonic() // Code for the ultrasonic sensor
 {
-  DDRB |= (1 << 7); // set trigger pin to output
-  PORTB &= ~(1 << 7); // write LOW to trigger pin
-  DDRH &= ~(1 << 7); // set echo pin to input
+  DDRA |= (1 << 4); // set trigger pin to output
+  PORTA &= ~(1 << 4); // write LOW to trigger pin
+  DDRA &= ~(1 << 5); // set echo pin to input
 }
 
 double readUltrasonic() { // detect distance of ultrasonic sensor from any objects in front of it
-  PORTB |= (1 << 7); // emit pulse from ultasonic sensor
+  PORTA |= (1 << 4); // emit pulse from ultasonic sensor
   delayMicroseconds(10); // delay 10 microseconds
-  PORTB &= ~(1 << 7); // stop emitting sound from ultrasonic sensor
-  DDRB &= ~(1 << 7); // set trigger pin to input mode
+  PORTA &= ~(1 << 4); // stop emitting sound from ultrasonic sensor
   double duration = pulseIn(ECHO, HIGH, TIMEOUT); // measure time taken to detect echo from initial ultrasonic pulse
   double dist = duration / 2 / 1000000 * SPEED_OF_SOUND * 100; // calculate distance of object from ultrasonic sensor in cm
   return dist; // return distance of object from ultrasonic sensor in cm
