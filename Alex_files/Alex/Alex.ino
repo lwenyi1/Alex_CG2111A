@@ -378,19 +378,18 @@ void writeSerial(const char *buffer, int len)
 
 void setupUltrasonic() // Code for the ultrasonic sensor
 {
-  DDRB |= (1 << 7); // set trigger pin to output
-  PORTB &= ~(1 << 7); // write LOW to trigger pin
-  DDRH &= ~(1 << 7); // set echo pin to input
+  DDRA |= (1 << 4); // set trigger pin to output
+  PORTA &= ~(1 << 4); // write LOW to trigger pin
+  DDRA &= ~(1 << 5); // set echo pin to input
 }
 
-double readUltrasonic() { // detect distance of ultrasonic sensor from any objects in front of it
-  PORTB |= (1 << 7); // emit pulse from ultasonic sensor
-  delayMicroseconds(10); // delay 10 microseconds
-  PORTB &= ~(1 << 7); // stop emitting sound from ultrasonic sensor
-  DDRB &= ~(1 << 7); // set trigger pin to input mode
+uint32_t readUltrasonic() { // detect distance of ultrasonic sensor from any objects in front of it
+  PORTA |= (1 << 4); // emit pulse from ultasonic sensor
+  delayMicroseconds(100); // delay 10 microseconds
+  PORTA &= ~(1 << 4); // stop emitting sound from ultrasonic sensor
   double duration = pulseIn(ECHO, HIGH, TIMEOUT); // measure time taken to detect echo from initial ultrasonic pulse
-  double dist = duration / 2 / 1000000 * SPEED_OF_SOUND * 100; // calculate distance of object from ultrasonic sensor in cm
-  return dist; // return distance of object from ultrasonic sensor in cm
+  double dist = duration / 2 / 10000 * SPEED_OF_SOUND; // calculate distance of object from ultrasonic sensor
+  return (uint32_t) round(dist); // return distance of object from ultrasonic sensor in cm
 }
 
 void sendDist(uint32_t distance) {
@@ -399,16 +398,17 @@ void sendDist(uint32_t distance) {
   distancePacket.command = RESP_ULTRASONIC;
   distancePacket.params[0] = distance;
   sendResponse(&distancePacket);
-  sendOK();
 }
 
 void setupColour() {
-  DDRB |= 0b01111000; 
-  DDRC |= 0b00000001;
+  DDRA |= 0b00001111; 
+  pinMode(sensorOut, INPUT);
   
   // Setting frequency-scaling to 20%
-   PORTB |= (1 << 3);
-   PORTB &= ~(1 << 4); // to be checked
+   digitalWrite(S0, HIGH);
+   digitalWrite(S1, LOW);
+   //PORTB = 0b00001000;
+   //PORTB &= ~(1 << 4); // to be checked
   /** digitalWrite(S0,HIGH);// to baremetal
   digitalWrite(S1,LOW); */ 
 }
@@ -459,23 +459,24 @@ void readColour() {
   TPacket colour;
   colour.packetType = PACKET_TYPE_RESPONSE;
   colour.command = RESP_COLOUR;
+  uint32_t frequency = 0;
   
   // Setting red filtered photodiodes to be read
-  PORTB &= ~((1 << 5)|(1 << 6)); // to be checked
+  //PORTB &= ~((1 << 5)|(1 << 6)); // to be checked
    
-  // digitalWrite(S2,LOW);
-  // digitalWrite(S3,LOW);
+  digitalWrite(S2,LOW);
+  digitalWrite(S3,LOW);
    
   // Reading the output frequency
-  int frequency = pulseIn(sensorOut, LOW);
+  frequency = pulseIn(sensorOut, LOW);
   colour.params[0] = frequency;
 
   delay(100);
 
   // Setting Green filtered photodiodes to be read
-  PORTB |= ((1 << 5)|(1 << 6)); // to be checked
-  // digitalWrite(S2,HIGH);
-  // digitalWrite(S3,HIGH);
+  //PORTB |= ((1 << 5)|(1 << 6)); // to be checked
+  digitalWrite(S2,HIGH);
+  digitalWrite(S3,HIGH);
   // Reading the output frequency
   frequency = pulseIn(sensorOut, LOW);
   colour.params[1] = frequency;
@@ -483,10 +484,10 @@ void readColour() {
   delay(100);
 
   // Setting Blue filtered photodiodes to be read
-  PORTB &= ~(1 << 5);
-  PORTB |= (1 << 6); // to be checked
-  // digitalWrite(S2,LOW);
-  // digitalWrite(S3,HIGH);
+  //PORTB &= ~(1 << 5);
+  //PORTB |= (1 << 6); // to be checked
+  digitalWrite(S2,LOW);
+  digitalWrite(S3,HIGH);
   // Reading the output frequency
   frequency = pulseIn(sensorOut, LOW);
   colour.params[2] = frequency;
@@ -568,14 +569,6 @@ void handleCommand(TPacket *command)
       sendOK();
       clearOneCounter(command->params[0]);
       break;
-     
-    case COMMAND_COLOUR:
-     readColour();
-     sendOK();
-
-    case COMMAND_ULTRASONIC:
-     readUltrasonic();
-     sendOK();
 
     case COMMAND_COLOUR:
       sendOK();
@@ -584,7 +577,7 @@ void handleCommand(TPacket *command)
 
     case COMMAND_ULTRASONIC:
       sendOK();
-      uint32_t distance = round(readUltrasonic());
+      uint32_t distance = readUltrasonic();
       sendDist(distance);
       break;
 
