@@ -383,9 +383,15 @@ void setupUltrasonic() // Code for the ultrasonic sensor
   DDRA &= ~(1 << 5); // set echo pin to input
 }
 
+<<<<<<< HEAD
 uint32_t readUltrasonic() { // detect distance of ultrasonic sensor from any objects in front of it
   PORTA |= (1 << 4); // emit pulse from ultasonic sensor
   delayMicroseconds(100); // delay 10 microseconds
+=======
+double readUltrasonic() { // detect distance of ultrasonic sensor from any objects in front of it
+  PORTA |= (1 << 4); // emit pulse from ultasonic sensor
+  delayMicroseconds(10); // delay 10 microseconds
+>>>>>>> baa01359bf510395f9fc59aab5d7f560db217c98
   PORTA &= ~(1 << 4); // stop emitting sound from ultrasonic sensor
   double duration = pulseIn(ECHO, HIGH, TIMEOUT); // measure time taken to detect echo from initial ultrasonic pulse
   double dist = duration / 2 / 10000 * SPEED_OF_SOUND; // calculate distance of object from ultrasonic sensor
