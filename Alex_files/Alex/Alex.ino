@@ -363,10 +363,10 @@ int readSerial(char *buffer)
 
 void writeSerial(const char *buffer, int len)
 {
-    for (int i = 0; i < len; i++) {
-      while (!(UCSR0A & (1 << UDRE0)));
-      UDR0 = buffer[i]; // write each byte of the buffer
-    }
+  for (int i = 0; i < len; i++) {
+    while (!(UCSR0A & (1 << UDRE0)));
+    UDR0 = buffer[i]; // write each byte of the buffer
+  }
   //Serial.write(buffer, len);
   // Change Serial to Serial2/Serial3/Serial4 in later labs when using other UARTs
 }
@@ -383,15 +383,9 @@ void setupUltrasonic() // Code for the ultrasonic sensor
   DDRA &= ~(1 << 5); // set echo pin to input
 }
 
-<<<<<<< HEAD
 uint32_t readUltrasonic() { // detect distance of ultrasonic sensor from any objects in front of it
   PORTA |= (1 << 4); // emit pulse from ultasonic sensor
-  delayMicroseconds(100); // delay 10 microseconds
-=======
-double readUltrasonic() { // detect distance of ultrasonic sensor from any objects in front of it
-  PORTA |= (1 << 4); // emit pulse from ultasonic sensor
-  delayMicroseconds(10); // delay 10 microseconds
->>>>>>> baa01359bf510395f9fc59aab5d7f560db217c98
+  delayMicroseconds(100); // delay 100 microseconds
   PORTA &= ~(1 << 4); // stop emitting sound from ultrasonic sensor
   double duration = pulseIn(ECHO, HIGH, TIMEOUT); // measure time taken to detect echo from initial ultrasonic pulse
   double dist = duration / 2 / 10000 * SPEED_OF_SOUND; // calculate distance of object from ultrasonic sensor
@@ -407,19 +401,19 @@ void sendDist(uint32_t distance) {
 }
 
 void setupColour() {
-  DDRA |= 0b00001111; 
+  DDRA |= 0b00001111;
   pinMode(sensorOut, INPUT);
-  
-  // Setting frequency-scaling to 20%
-   digitalWrite(S0, HIGH);
-   digitalWrite(S1, LOW);
-   //PORTB = 0b00001000;
-   //PORTB &= ~(1 << 4); // to be checked
-  /** digitalWrite(S0,HIGH);// to baremetal
-  digitalWrite(S1,LOW); */ 
-}
 
-float triangularMembership(int x, int a, int b, int c) {
+  // Setting frequency-scaling to 20%
+  digitalWrite(S0, HIGH);
+  digitalWrite(S1, LOW);
+  //PORTB = 0b00001000;
+  //PORTB &= ~(1 << 4); // to be checked
+  /** digitalWrite(S0,HIGH);// to baremetal
+    digitalWrite(S1,LOW); */
+}
+/*
+  float triangularMembership(int x, int a, int b, int c) {
   if (x < a) {
     return 0;
   }
@@ -432,47 +426,76 @@ float triangularMembership(int x, int a, int b, int c) {
   else {
     return 0;
   }
-}
+  }
+*/
 
 void evaluateColour(int r, int g, int b, TPacket *colour) {
-  float redR = triangularMembership(r, 199, 369, 463);
-  float greenR = triangularMembership(r, 400, 534, 584);
-  float whiteR = triangularMembership(r, 160, 300, 412);    
+  /*
+    float redR = triangularMembership(r, 276, 380, 456);
+    float greenR = triangularMembership(r, 500, 585, 628);
+    float whiteR = triangularMembership(r, 425, 493, 531);
 
-  float redG = triangularMembership(g, 393, 518, 561);
-  float greenG = triangularMembership(g, 337, 468, 528);
-  float whiteG = triangularMembership(g, 153, 290, 398);  
+    float redG = triangularMembership(g, 414, 525, 584);
+    float greenG = triangularMembership(g, 331, 453, 524);
+    float whiteG = triangularMembership(g, 408, 493, 525);
 
-  float redB = triangularMembership(b, 331, 369, 463);
-  float greenB = triangularMembership(b, 400, 534, 584);
-  float whiteB = triangularMembership(b, 134, 255, 346);   
+    float redB = triangularMembership(b, 198, 293, 353);
+    float greenB = triangularMembership(b, 201, 313, 387);
+    float whiteB = triangularMembership(b, 181, 290, 353);
 
-  float weightedRed = ((r * redR) + (g * redG) + (b * redB))/(redR + redG + redB);
-  float weightedGreen = ((r * greenR) + (g * greenG) + (b * greenB))/(greenR + greenG + greenB);
-  float weightedWhite = ((r * whiteR) + (g * whiteG) + (b * whiteB))/(whiteR + whiteG + whiteB);
+    float weightedRed = ((r * redR) + (g * redG) + (b * redB))/(redR + redG + redB);
+    float weightedGreen = ((r * greenR) + (g * greenG) + (b * greenB))/(greenR + greenG + greenB);
+    float weightedWhite = ((r * whiteR) + (g * whiteG) + (b * whiteB))/(whiteR + whiteG + whiteB);
 
-  if (weightedRed > weightedGreen && weightedRed > weightedWhite) {
+    if (weightedRed > weightedGreen && weightedRed > weightedWhite) {
     colour->params[3] = 0; //RED
-  } else if (weightedGreen > weightedWhite) {
+    } else if (weightedGreen > weightedWhite) {
     colour->params[3] = 1; //GREEN
-  } else {
+    } else {
     colour->params[3] = 2; //WHITE
+    }
+  */
+  float rgbArr[3][3] = {{0.6425624, 0.7596533, 1.1819191}, {1.1747332, 1.0639985, 0.9094113}, {0.9444405, 1.0347558, 1.095375}};
+  float rgNew = (float)r / (float)g;
+  float rbNew = (float)r / (float)b;
+  float gbNew = (float)g / (float)b;
+  float rgbCol[3] = {rgNew, rbNew, gbNew};
+
+  float errCol[3] = {0, 0, 0};
+
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      errCol[i] += (rgbCol[j] - rgbArr[i][j]) * (rgbCol[j] - rgbArr[i][j]);
+    }
   }
-  return;
+
+  float minimum = errCol[0];
+  int min_index = 0;
+  for (int k = 0; k < 3; k++) {
+    if (errCol[k] < minimum) {
+      minimum = errCol[k];
+      min_index = k;
+    }
+  }
+  colour->params[3] = min_index;
+
 }
+
+
+
 
 void readColour() {
   TPacket colour;
   colour.packetType = PACKET_TYPE_RESPONSE;
   colour.command = RESP_COLOUR;
   uint32_t frequency = 0;
-  
+
   // Setting red filtered photodiodes to be read
   //PORTB &= ~((1 << 5)|(1 << 6)); // to be checked
-   
-  digitalWrite(S2,LOW);
-  digitalWrite(S3,LOW);
-   
+
+  digitalWrite(S2, LOW);
+  digitalWrite(S3, LOW);
+
   // Reading the output frequency
   frequency = pulseIn(sensorOut, LOW);
   colour.params[0] = frequency;
@@ -481,8 +504,8 @@ void readColour() {
 
   // Setting Green filtered photodiodes to be read
   //PORTB |= ((1 << 5)|(1 << 6)); // to be checked
-  digitalWrite(S2,HIGH);
-  digitalWrite(S3,HIGH);
+  digitalWrite(S2, HIGH);
+  digitalWrite(S3, HIGH);
   // Reading the output frequency
   frequency = pulseIn(sensorOut, LOW);
   colour.params[1] = frequency;
@@ -492,16 +515,16 @@ void readColour() {
   // Setting Blue filtered photodiodes to be read
   //PORTB &= ~(1 << 5);
   //PORTB |= (1 << 6); // to be checked
-  digitalWrite(S2,LOW);
-  digitalWrite(S3,HIGH);
+  digitalWrite(S2, LOW);
+  digitalWrite(S3, HIGH);
   // Reading the output frequency
   frequency = pulseIn(sensorOut, LOW);
   colour.params[2] = frequency;
-  
+
   delay(100);
 
   evaluateColour(colour.params[0], colour.params[1], colour.params[2], &colour);
-   
+
   sendResponse(&colour);
 }
 
@@ -669,7 +692,7 @@ void loop() {
   // Uncomment the code below for Step 2 of Activity 3 in Week 8 Studio 2
 
   // put your main code here, to run repeatedly:
-   
+
   TPacket recvPacket; // This holds commands from the Pi
 
   TResult result = readPacket(&recvPacket);
