@@ -3,15 +3,15 @@
 
 void setupColour() {
   DDRA |= 0b00001111;
-  pinMode(sensorOut, INPUT);
-
+  //pinMode(sensorOut, INPUT);
+  DDRK &= ~0b1;
   // Setting frequency-scaling to 20%
-  digitalWrite(S0, HIGH);
-  digitalWrite(S1, LOW);
-  //PORTB = 0b00001000;
+  //digitalWrite(S0, HIGH);
+  //digitalWrite(S1, LOW);
+  PORTA |= 0b1;
+  PORTA &= ~(1 << 1);
+
   //PORTB &= ~(1 << 4); // to be checked
-  /** digitalWrite(S0,HIGH);// to baremetal
-    digitalWrite(S1,LOW); */
 }
 
 void evaluateColour(int r, int g, int b, TPacket *colour) {
@@ -47,10 +47,10 @@ void readColour() {
   uint32_t frequency = 0;
 
   // Setting red filtered photodiodes to be read
-  //PORTB &= ~((1 << 5)|(1 << 6)); // to be checked
-
-  digitalWrite(S2, LOW);
-  digitalWrite(S3, LOW);
+  PORTA &= ~((1 << 2)|(1 << 3)); // to be checked
+  
+  //digitalWrite(S2, LOW);
+  //digitalWrite(S3, LOW);
 
   // Reading the output frequency
   frequency = pulseIn(sensorOut, LOW);
@@ -59,9 +59,9 @@ void readColour() {
   delay(100);
 
   // Setting Green filtered photodiodes to be read
-  //PORTB |= ((1 << 5)|(1 << 6)); // to be checked
-  digitalWrite(S2, HIGH);
-  digitalWrite(S3, HIGH);
+  PORTA |= ((1 << 2)|(1 << 3)); // to be checked
+  //digitalWrite(S2, HIGH);
+  //digitalWrite(S3, HIGH);
   // Reading the output frequency
   frequency = pulseIn(sensorOut, LOW);
   colour.params[1] = frequency;
@@ -69,10 +69,10 @@ void readColour() {
   delay(100);
 
   // Setting Blue filtered photodiodes to be read
-  //PORTB &= ~(1 << 5);
-  //PORTB |= (1 << 6); // to be checked
-  digitalWrite(S2, LOW);
-  digitalWrite(S3, HIGH);
+  PORTA &= ~(1 << 2);
+  PORTB |= (1 << 3); // to be checked
+  //digitalWrite(S2, LOW);
+  //digitalWrite(S3, HIGH);
   // Reading the output frequency
   frequency = pulseIn(sensorOut, LOW);
   colour.params[2] = frequency;
