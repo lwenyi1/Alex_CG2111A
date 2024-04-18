@@ -63,10 +63,11 @@ If all goes well, the client will connect to the server successfully and you can
 
 ## ROS, RPLidar and SLAM
 > The missile knows where it is, because it knows where it isn't.
+Big thank you to the hardworking, actually competent individuals and organisations that made the following guides and repos. Your work is appreciated.
 
 ### Setting up ROS
 The ROS version used for this project was ROS Noetic. Instructions to set it up can be found [here](https://wiki.ros.org/noetic/Installation/Ubuntu). 
-Note that both your laptop and RPi must ahve ROS installed.
+Note that both your laptop and RPi must have ROS installed.
 
 ### Setting up RPLidar
 We used the repository provided by Slamtec, the set up and repository can be found [here](https://github.com/Slamtec/rplidar_ros).
@@ -97,6 +98,6 @@ roslaunch hector_slam_launch tutorial.launch
 If all goes well, Rviz should start up and display your map. 
 
 ## Additional notes
-This is just meant to be a very rough guide for lost souls interested in this project. The code here is by no means perfect (frankly, I don't think its very good) and has a lot of room for improvement.
+This is just meant to be a very rough guide for lost souls interested in this project. The code here is by no means perfect (frankly, I don't think its very good) and has a lot of room for improvement. To the new CG2111A students looking for inspiration and have stumbled upon this, keep looking. I wouldn't trust my code.
 
 For set up and troubleshooting, your best friends are YouTube and ChatGPT.
