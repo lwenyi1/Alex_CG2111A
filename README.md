@@ -98,6 +98,6 @@ roslaunch hector_slam_launch tutorial.launch
 If all goes well, Rviz should start up and display your map. 
 
 ## Additional notes
-This is just meant to be a very rough guide for lost souls interested in this project. The code here is by no means perfect (frankly, I don't think its very good) and has a lot of room for improvement. To the new CG2111A students looking for inspiration and have stumbled upon this, keep looking. I wouldn't trust my code.
+This is just meant to be a very rough guide for lost souls interested in this project. The code here is by no means perfect (frankly, I don't think its very good, but it was good enough to complete the mod I guess) and has a lot of room for improvement. To the new CG2111A students looking for inspiration and have stumbled upon this, keep looking, I wouldn't trust my code.
 
 For set up and troubleshooting, your best friends are YouTube and ChatGPT.
